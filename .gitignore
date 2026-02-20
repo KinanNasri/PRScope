@@ -1,0 +1,20 @@
+node_modules/
+*.tsbuildinfo
+
+# Build output (except action dist which is committed)
+packages/core/dist/
+packages/cli/dist/
+
+# Environment
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
