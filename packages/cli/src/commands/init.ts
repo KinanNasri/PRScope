@@ -94,7 +94,7 @@ export async function runInit(): Promise<void> {
         `Add your API key as a repository secret named ${apiKeyEnv}`,
         "Commit prism.config.json and .github/workflows/prism.yml",
         "Open a pull request",
-        "Watch PRism review your code ✨",
+        "Watch PRism review your code",
     ]);
 }
 

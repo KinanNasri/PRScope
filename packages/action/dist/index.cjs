@@ -4239,31 +4239,39 @@ function parseReviewResult(raw) {
 function parseConfig(raw) {
   return PrismConfigSchema.parse(raw);
 }
-var RISK_BADGES = {
-  low: "\u{1F7E2} Low Risk",
-  medium: "\u{1F7E1} Medium Risk",
-  high: "\u{1F534} High Risk"
+var RISK_LABELS = {
+  low: "Low Risk",
+  medium: "Medium Risk",
+  high: "High Risk"
 };
-var SEVERITY_ICONS = {
-  high: "\u{1F534}",
-  medium: "\u{1F7E1}",
-  low: "\u{1F535}"
+var SEVERITY_LABELS = {
+  high: "High",
+  medium: "Medium",
+  low: "Low"
 };
 var CATEGORY_LABELS = {
-  bug: "\u{1F41B} Bug",
-  security: "\u{1F512} Security",
-  performance: "\u26A1 Performance",
-  maintainability: "\u{1F9F9} Maintainability",
-  dx: "\u2728 DX"
+  bug: "Bug",
+  security: "Security",
+  performance: "Performance",
+  maintainability: "Maintainability",
+  dx: "Developer Experience"
 };
+function riskIndicator(risk) {
+  const dots = {
+    low: "`LOW`",
+    medium: "`MEDIUM`",
+    high: "`HIGH`"
+  };
+  return dots[risk];
+}
 function renderFindingsTable(findings) {
-  if (findings.length === 0) return "_No findings \u2014 this PR looks great._\n";
+  if (findings.length === 0) return "*No issues found \u2014 this PR looks good.*\n";
   const sorted = [...findings].sort((a, b) => {
     const order = { high: 0, medium: 1, low: 2 };
     return (order[a.severity] ?? 2) - (order[b.severity] ?? 2);
   });
   const rows = sorted.map((f) => {
-    const severity = `${SEVERITY_ICONS[f.severity] ?? "\u26AA"} ${f.severity}`;
+    const severity = SEVERITY_LABELS[f.severity] ?? f.severity;
     const category = CATEGORY_LABELS[f.category] ?? f.category;
     const location = f.line ? `\`${f.file}:${f.line}\`` : `\`${f.file}\``;
     return `| ${severity} | ${category} | ${f.title} | ${location} |`;
@@ -4280,18 +4288,17 @@ function renderFindingDetails(findings) {
   const details = findings.map((f) => {
     const location = f.line ? `${f.file}:${f.line}` : f.file;
     return [
-      `#### ${SEVERITY_ICONS[f.severity] ?? "\u26AA"} ${f.title}`,
-      `**Location:** \`${location}\`  `,
-      `**Confidence:** ${Math.round(f.confidence * 100)}%`,
+      `#### ${f.title}`,
+      `**Location:** \`${location}\` \u2014 **Confidence:** ${Math.round(f.confidence * 100)}%`,
       "",
       f.message,
       "",
-      f.suggestion ? `> \u{1F4A1} **Suggestion:** ${f.suggestion}` : ""
+      f.suggestion ? `> **Suggestion:** ${f.suggestion}` : ""
     ].filter(Boolean).join("\n");
   });
   return [
     "<details>",
-    "<summary>\u{1F4CB} Detailed Findings</summary>",
+    "<summary>Detailed findings</summary>",
     "",
     ...details,
     "",
@@ -4302,14 +4309,15 @@ function renderFindingDetails(findings) {
 function renderPraise(praise) {
   if (praise.length === 0) return "";
   const items = praise.map((p) => `- ${p}`).join("\n");
-  return ["<details>", "<summary>\u{1F31F} What looks great</summary>", "", items, "", "</details>", ""].join("\n");
+  return ["<details>", "<summary>What looks good</summary>", "", items, "", "</details>", ""].join("\n");
 }
 function renderComment(result) {
-  const badge = RISK_BADGES[result.overall_risk];
+  const badge = RISK_LABELS[result.overall_risk];
+  const indicator = riskIndicator(result.overall_risk);
   return [
     PRISM_COMMENT_MARKER,
     "",
-    `## \u{1F52C} PRism Review \u2014 ${badge}`,
+    `## PRism Review \u2014 ${badge} ${indicator}`,
     "",
     result.summary,
     "",
@@ -4322,7 +4330,7 @@ function renderComment(result) {
     renderPraise(result.praise),
     "---",
     "",
-    '<sub>Powered by <a href="https://github.com/prism-review/prism">PRism</a> \u2014 see through your pull requests.</sub>',
+    '<sub>Powered by <a href="https://github.com/KinanNasri/PRism">PRism</a> \u2014 see through your pull requests.</sub>',
     ""
   ].join("\n");
 }
@@ -4330,17 +4338,17 @@ function renderFallbackComment(error) {
   return [
     PRISM_COMMENT_MARKER,
     "",
-    "## \u{1F52C} PRism Review",
+    "## PRism Review",
     "",
-    "\u26A0\uFE0F PRism could not produce a structured review for this PR.",
+    "PRism could not produce a structured review for this PR.",
     "",
     `**Reason:** ${error}`,
     "",
-    "The LLM response did not match the expected schema. This can happen with very large diffs or model-specific formatting quirks. The PR was still analyzed \u2014 try re-running the workflow.",
+    "The model response did not match the expected schema. This can happen with very large diffs or provider-specific formatting quirks. The PR was still analyzed \u2014 try re-running the workflow.",
     "",
     "---",
     "",
-    '<sub>Powered by <a href="https://github.com/prism-review/prism">PRism</a></sub>',
+    '<sub>Powered by <a href="https://github.com/KinanNasri/PRism">PRism</a></sub>',
     ""
   ].join("\n");
 }
@@ -4379,12 +4387,14 @@ function sleep(ms) {
   return new Promise((resolve2) => setTimeout(resolve2, ms));
 }
 var FEATURED_MODELS = /* @__PURE__ */ new Set([
+  "gpt-4.1",
+  "gpt-4.1-mini",
+  "gpt-4.1-nano",
   "gpt-4o",
   "gpt-4o-mini",
-  "gpt-4-turbo",
-  "o1",
-  "o1-mini",
-  "o3-mini"
+  "o3",
+  "o3-mini",
+  "o4-mini"
 ]);
 function createOpenAIProvider(config) {
   const headers = {
@@ -4485,9 +4495,9 @@ function getAnthropicFallbackModels() {
   return [
     { id: "claude-sonnet-4-20250514", name: "Claude Sonnet 4" },
     { id: "claude-haiku-4-20250514", name: "Claude Haiku 4" },
+    { id: "claude-3-7-sonnet-20250219", name: "Claude 3.7 Sonnet" },
     { id: "claude-3-5-sonnet-20241022", name: "Claude 3.5 Sonnet" },
-    { id: "claude-3-5-haiku-20241022", name: "Claude 3.5 Haiku" },
-    { id: "claude-3-opus-20240229", name: "Claude 3 Opus" }
+    { id: "claude-3-5-haiku-20241022", name: "Claude 3.5 Haiku" }
   ];
 }
 function createOpenAICompatProvider(config) {

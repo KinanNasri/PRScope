@@ -16,12 +16,14 @@ interface OpenAIModelsResponse {
 }
 
 const FEATURED_MODELS = new Set([
+    "gpt-4.1",
+    "gpt-4.1-mini",
+    "gpt-4.1-nano",
     "gpt-4o",
     "gpt-4o-mini",
-    "gpt-4-turbo",
-    "o1",
-    "o1-mini",
+    "o3",
     "o3-mini",
+    "o4-mini",
 ]);
 
 export function createOpenAIProvider(config: OpenAIConfig): ChatProvider {

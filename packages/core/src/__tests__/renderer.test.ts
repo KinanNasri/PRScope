@@ -37,9 +37,9 @@ describe("renderComment", () => {
         expect(comment).toContain(PRISM_COMMENT_MARKER);
     });
 
-    it("shows the risk badge", () => {
+    it("shows the risk label", () => {
         const comment = renderComment(result);
-        expect(comment).toContain("🟡 Medium Risk");
+        expect(comment).toContain("Medium Risk");
     });
 
     it("includes the summary", () => {
@@ -64,20 +64,20 @@ describe("renderComment", () => {
     it("includes collapsible details", () => {
         const comment = renderComment(result);
         expect(comment).toContain("<details>");
-        expect(comment).toContain("Detailed Findings");
+        expect(comment).toContain("Detailed findings");
     });
 
     it("includes praise section", () => {
         const comment = renderComment(result);
-        expect(comment).toContain("What looks great");
+        expect(comment).toContain("What looks good");
         expect(comment).toContain("Great test coverage");
     });
 
     it("handles empty findings gracefully", () => {
         const clean: ReviewResult = { summary: "All good.", overall_risk: "low", findings: [], praise: [] };
         const comment = renderComment(clean);
-        expect(comment).toContain("looks great");
-        expect(comment).toContain("🟢 Low Risk");
+        expect(comment).toContain("looks good");
+        expect(comment).toContain("Low Risk");
     });
 });
 

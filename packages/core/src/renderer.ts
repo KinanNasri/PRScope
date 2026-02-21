@@ -1,28 +1,37 @@
 import type { Finding, ReviewResult, RiskLevel } from "./types.js";
 import { PRISM_COMMENT_MARKER } from "./types.js";
 
-const RISK_BADGES: Record<RiskLevel, string> = {
-    low: "🟢 Low Risk",
-    medium: "🟡 Medium Risk",
-    high: "🔴 High Risk",
+const RISK_LABELS: Record<RiskLevel, string> = {
+    low: "Low Risk",
+    medium: "Medium Risk",
+    high: "High Risk",
 };
 
-const SEVERITY_ICONS: Record<string, string> = {
-    high: "🔴",
-    medium: "🟡",
-    low: "🔵",
+const SEVERITY_LABELS: Record<string, string> = {
+    high: "High",
+    medium: "Medium",
+    low: "Low",
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
-    bug: "🐛 Bug",
-    security: "🔒 Security",
-    performance: "⚡ Performance",
-    maintainability: "🧹 Maintainability",
-    dx: "✨ DX",
+    bug: "Bug",
+    security: "Security",
+    performance: "Performance",
+    maintainability: "Maintainability",
+    dx: "Developer Experience",
 };
 
+function riskIndicator(risk: RiskLevel): string {
+    const dots: Record<RiskLevel, string> = {
+        low: "`LOW`",
+        medium: "`MEDIUM`",
+        high: "`HIGH`",
+    };
+    return dots[risk];
+}
+
 function renderFindingsTable(findings: Finding[]): string {
-    if (findings.length === 0) return "_No findings — this PR looks great._\n";
+    if (findings.length === 0) return "*No issues found — this PR looks good.*\n";
 
     const sorted = [...findings].sort((a, b) => {
         const order: Record<string, number> = { high: 0, medium: 1, low: 2 };
@@ -30,7 +39,7 @@ function renderFindingsTable(findings: Finding[]): string {
     });
 
     const rows = sorted.map((f) => {
-        const severity = `${SEVERITY_ICONS[f.severity] ?? "⚪"} ${f.severity}`;
+        const severity = SEVERITY_LABELS[f.severity] ?? f.severity;
         const category = CATEGORY_LABELS[f.category] ?? f.category;
         const location = f.line ? `\`${f.file}:${f.line}\`` : `\`${f.file}\``;
         return `| ${severity} | ${category} | ${f.title} | ${location} |`;
@@ -50,13 +59,12 @@ function renderFindingDetails(findings: Finding[]): string {
     const details = findings.map((f) => {
         const location = f.line ? `${f.file}:${f.line}` : f.file;
         return [
-            `#### ${SEVERITY_ICONS[f.severity] ?? "⚪"} ${f.title}`,
-            `**Location:** \`${location}\`  `,
-            `**Confidence:** ${Math.round(f.confidence * 100)}%`,
+            `#### ${f.title}`,
+            `**Location:** \`${location}\` — **Confidence:** ${Math.round(f.confidence * 100)}%`,
             "",
             f.message,
             "",
-            f.suggestion ? `> 💡 **Suggestion:** ${f.suggestion}` : "",
+            f.suggestion ? `> **Suggestion:** ${f.suggestion}` : "",
         ]
             .filter(Boolean)
             .join("\n");
@@ -64,7 +72,7 @@ function renderFindingDetails(findings: Finding[]): string {
 
     return [
         "<details>",
-        "<summary>📋 Detailed Findings</summary>",
+        "<summary>Detailed findings</summary>",
         "",
         ...details,
         "",
@@ -77,16 +85,17 @@ function renderPraise(praise: string[]): string {
     if (praise.length === 0) return "";
 
     const items = praise.map((p) => `- ${p}`).join("\n");
-    return ["<details>", "<summary>🌟 What looks great</summary>", "", items, "", "</details>", ""].join("\n");
+    return ["<details>", "<summary>What looks good</summary>", "", items, "", "</details>", ""].join("\n");
 }
 
 export function renderComment(result: ReviewResult): string {
-    const badge = RISK_BADGES[result.overall_risk];
+    const badge = RISK_LABELS[result.overall_risk];
+    const indicator = riskIndicator(result.overall_risk);
 
     return [
         PRISM_COMMENT_MARKER,
         "",
-        `## 🔬 PRism Review — ${badge}`,
+        `## PRism Review — ${badge} ${indicator}`,
         "",
         result.summary,
         "",
@@ -99,7 +108,7 @@ export function renderComment(result: ReviewResult): string {
         renderPraise(result.praise),
         "---",
         "",
-        "<sub>Powered by <a href=\"https://github.com/prism-review/prism\">PRism</a> — see through your pull requests.</sub>",
+        "<sub>Powered by <a href=\"https://github.com/KinanNasri/PRism\">PRism</a> — see through your pull requests.</sub>",
         "",
     ].join("\n");
 }
@@ -108,17 +117,17 @@ export function renderFallbackComment(error: string): string {
     return [
         PRISM_COMMENT_MARKER,
         "",
-        "## 🔬 PRism Review",
+        "## PRism Review",
         "",
-        "⚠️ PRism could not produce a structured review for this PR.",
+        "PRism could not produce a structured review for this PR.",
         "",
         `**Reason:** ${error}`,
         "",
-        "The LLM response did not match the expected schema. This can happen with very large diffs or model-specific formatting quirks. The PR was still analyzed — try re-running the workflow.",
+        "The model response did not match the expected schema. This can happen with very large diffs or provider-specific formatting quirks. The PR was still analyzed — try re-running the workflow.",
         "",
         "---",
         "",
-        "<sub>Powered by <a href=\"https://github.com/prism-review/prism\">PRism</a></sub>",
+        "<sub>Powered by <a href=\"https://github.com/KinanNasri/PRism\">PRism</a></sub>",
         "",
     ].join("\n");
 }

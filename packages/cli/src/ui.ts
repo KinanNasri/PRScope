@@ -25,19 +25,19 @@ export function banner(): void {
 }
 
 export function heading(text: string): void {
-    console.log(`\n${CYAN}${BOLD}▸ ${text}${RESET}\n`);
+    console.log(`\n${CYAN}${BOLD}> ${text}${RESET}\n`);
 }
 
 export function success(text: string): void {
-    console.log(`  ${GREEN}✓${RESET} ${text}`);
+    console.log(`  ${GREEN}+${RESET} ${text}`);
 }
 
 export function warn(text: string): void {
-    console.log(`  ${YELLOW}⚠${RESET} ${text}`);
+    console.log(`  ${YELLOW}!${RESET} ${text}`);
 }
 
 export function error(text: string): void {
-    console.log(`  ${RED}✗${RESET} ${text}`);
+    console.log(`  ${RED}x${RESET} ${text}`);
 }
 
 export function info(text: string): void {

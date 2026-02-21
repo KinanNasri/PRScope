@@ -20,12 +20,14 @@ interface OllamaTagsResponse {
 }
 
 const RECOMMENDED_MODELS = [
-    "llama3.1:8b",
-    "llama3.1:70b",
-    "deepseek-coder-v2:16b",
-    "codellama:13b",
+    "llama3.3:70b",
+    "llama3.2:8b",
+    "qwen2.5-coder:32b",
     "qwen2.5-coder:7b",
-    "mistral:7b",
+    "deepseek-r1:14b",
+    "deepseek-coder-v2:16b",
+    "codestral:22b",
+    "mistral-small:22b",
 ];
 
 export function createOllamaProvider(config: OllamaConfig): ChatProvider {
