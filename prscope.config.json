@@ -1,0 +1,10 @@
+{
+  "provider": "openai",
+  "model": "gpt-5.2",
+  "apiKeyEnv": "OPENAI_API_KEY",
+  "profile": "performance",
+  "commentMode": "summary-only",
+  "maxFiles": 30,
+  "maxDiffBytes": 100000,
+  "baseUrl": "https://api.openai.com"
+}
