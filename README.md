@@ -2,8 +2,9 @@
 # PRScope
 
 **AI-powered code reviews that actually help.**
-<img width="647" height="700" alt="image" src="https://github.com/user-attachments/assets/5b3ae721-1ae5-43ba-a85e-3308bef0d783" />
-
+<p align="center">
+  <img src="docs/assets/prscope-demo.png" width="900" alt="PRScope demo" />
+</p>
 Stop waiting days for human reviewers to point out an unvalidated input six files deep.
 PRScope reads your diffs, understands context, and posts structured findings — directly on your pull request in under a minute.
 
